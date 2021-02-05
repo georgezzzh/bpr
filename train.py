@@ -56,6 +56,7 @@ class TripletUniformPair(IterableDataset):
         self.index += self.num_workers
         return result
 
+    # 三元组，返回pair中的user和item和随机抽样一个item，只要这个item不在与user交互的item即可
     def _example(self, idx):
         u = self.pair[idx][0]
         i = self.pair[idx][1]
@@ -95,6 +96,7 @@ class BPR(nn.Module):
         regularization = self.weight_decay * (u.norm(dim=1).pow(2).sum() + i.norm(dim=1).pow(2).sum() + j.norm(dim=1).pow(2).sum())
         return -log_prob + regularization
 
+    # 预测，给定用户u，所有得分的item按照得分倒序排列
     def recommend(self, u):
         """Return recommended item list given users.
 
@@ -240,7 +242,7 @@ if __name__ == '__main__':
     # Training
     parser.add_argument('--n_epochs',
                         type=int,
-                        default=500,
+                        default=1,
                         help="Number of epoch during training")
     parser.add_argument('--batch_size',
                         type=int,

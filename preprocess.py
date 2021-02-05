@@ -111,7 +111,9 @@ class Gowalla(DatasetLoader):
 
 
 def convert_unique_idx(df, column_name):
+    # 其中i是顺序编号，x是原始的unique数据
     column_dict = {x: i for i, x in enumerate(df[column_name].unique())}
+    # 排序在item数量范围内，例如一共有5000个item，编号是1-10000，通过字典映射回1-5000
     df[column_name] = df[column_name].apply(column_dict.get)
     df[column_name] = df[column_name].astype('int')
     assert df[column_name].min() == 0
@@ -120,6 +122,7 @@ def convert_unique_idx(df, column_name):
 
 
 def create_user_list(df, user_size):
+    # 建立一个user大小的列表，列表中每一项还是一个列表，列表的index表示用户，其中的内容表示时间和item
     user_list = [list() for u in range(user_size)]
     for row in df.itertuples():
         user_list[row.user].append((row.time, row.item))
@@ -151,12 +154,14 @@ def split_train_test(df, user_size, test_size=0.2, time_order=False):
             # Register to each user list
             test_user_list[user] = test_item
             train_user_list[user] = train_item
-    # Remove time
+    # Remove time, 把时间信息删除
     test_user_list = [list(map(lambda x: x[1], l)) for l in test_user_list]
     train_user_list = [list(map(lambda x: x[1], l)) for l in train_user_list]
+    print(test_user_list)
     return train_user_list, test_user_list
 
 
+# 把[user, item]中的元素组合形成(user, item)二元组
 def create_pair(user_list):
     pair = []
     for user, item_list in enumerate(user_list):
@@ -188,7 +193,7 @@ def main(args):
 
     train_pair = create_pair(train_user_list)
     print('Complete creating pair')
-
+    # 把数据集相关内容卸载pickle文件中
     dataset = {'user_size': user_size, 'item_size': item_size, 
                'user_mapping': user_mapping, 'item_mapping': item_mapping,
                'train_user_list': train_user_list, 'test_user_list': test_user_list,
